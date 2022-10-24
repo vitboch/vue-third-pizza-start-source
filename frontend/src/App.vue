@@ -1,12 +1,19 @@
 <script setup>
-import { AppLayout } from "@/layouts";
-import { HomeView } from "@/views";
+import { computed, defineAsyncComponent } from "vue";
+import { useRoute } from "vue-router";
+
+const route = useRoute();
+
+const layout = computed(() => {
+  const layoutName = route.meta?.layout ?? "DefaultLayout";
+  return defineAsyncComponent(() => import(`./layouts/${layoutName}.vue`));
+});
 </script>
 
 <template>
-  <app-layout>
-    <home-view />
-  </app-layout>
+  <component :is="layout">
+    <router-view />
+  </component>
 </template>
 
 <style lang="scss">
