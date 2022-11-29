@@ -12,10 +12,10 @@
           <input
               type="radio"
               name="dough"
-              :value="doughType.value"
-              :checked="doughType.value === modelValue"
+              :value="doughType.id"
+              :checked="doughType.id === modelValue"
               class="visually-hidden"
-              @input="emit('update:modelValue', doughType.value)"
+              @input="emit('update:modelValue', doughType.id)"
           />
           <img :src="getImage(doughType.image)" :alt="doughType.name" />
 
@@ -30,8 +30,8 @@
 <script setup>
 defineProps({
   modelValue: {
-    type: String,
-    default: "",
+    type: Number,
+    required: true,
   },
   items: {
     type: Array,
@@ -47,7 +47,8 @@ const getImage = (image) => {
 </script>
 
 <style lang="scss" scoped>
-@import "@/assets/scss/app.scss";
+@import "@/assets/scss/ds-system/ds.scss";
+@import "@/assets/scss/mixins/mixins.scss";
 
 .content__dough {
   width: 527px;

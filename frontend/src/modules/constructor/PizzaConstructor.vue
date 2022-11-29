@@ -1,16 +1,16 @@
 <template>
   <div class="pizza-constructor">
-    <app-drop @drop="emit('drop', $event.value)">
+    <app-drop @drop="emit('drop', $event.id)">
       <div class="pizza" :class="`pizza--foundation--${dough}-${sauce}`">
         <div class="pizza__wrapper">
           <div
-              v-for="(value, key) in pizzaIngredients"
-              :key="key"
+              v-for="item in ingredients"
+              :key="item.id"
               class="pizza__filling"
               :class="[
-              `pizza__filling--${key}`,
-              value === TWO_INGREDIENTS && 'pizza__filling--second',
-              value === THREE_INGREDIENTS && 'pizza__filling--third',
+              `pizza__filling--${item.value}`,
+              item.quantity === TWO_INGREDIENTS && 'pizza__filling--second',
+              item.quantity === THREE_INGREDIENTS && 'pizza__filling--third',
             ]"
           />
         </div>
@@ -20,53 +20,30 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
 import AppDrop from "@/common/components/AppDrop.vue";
 
 const TWO_INGREDIENTS = 2;
 const THREE_INGREDIENTS = 3;
 
-const props = defineProps({
+defineProps({
   dough: {
     type: String,
-    default: "light",
+    default: "",
   },
   sauce: {
     type: String,
-    default: "tomato",
+    default: "",
   },
   ingredients: {
-    type: Object,
-    default: () => ({}),
+    type: Array,
+    default: () => [],
   },
 });
 
 const emit = defineEmits(["drop"]);
-
-const pizzaIngredients = computed(() => {
-  /*
-   * props.ingredients - это объект с ингредиентами вида { ингредиент: количество }
-   * при помощи reduce нам нужно оставить только те, количество которые больше 0
-   * для этого перебираем каждую пару [ингредиент, количество]
-   * и если количество больше 0, добавляем в объект-результат
-   */
-  return Object.entries(props.ingredients).reduce((result, entry) => {
-    /* [ингредиент, количество] */
-    const [key, value] = entry;
-
-    if (value > 0) {
-      /* ингредиент присутствует в пицце */
-      result[key] = value;
-    }
-
-    return result;
-  }, {});
-});
 </script>
 
 <style lang="scss" scoped>
-@import "@/assets/scss/app.scss";
-
 .pizza-constructor {
   width: 315px;
   margin-top: 25px;

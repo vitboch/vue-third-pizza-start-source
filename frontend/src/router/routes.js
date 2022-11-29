@@ -1,29 +1,27 @@
-import { RouterView } from "vue-router";
-
 export const routes = [
   {
-    path: "/",
-    component: RouterView,
-    children: [
-      {
-        path: "",
-        name: "home",
-        component: () => import("@/views/HomeView.vue"),
-        meta: { layout: "DefaultLayout" },
-      },
-      {
-        path: "login",
-        name: "login",
-        component: () => import("@/views/LoginView.vue"),
-        meta: { layout: "SimpleLayout" },
-      },
-    ],
+    path: "",
+    name: "home",
+    component: () => import("@/views/HomeView.vue"),
+    meta: { layout: "DefaultLayout" },
+  },
+  {
+    path: "/login",
+    name: "login",
+    component: () => import("@/views/LoginView.vue"),
+    meta: { layout: "SimpleLayout" },
   },
   {
     path: "/cart",
     name: "cart",
     component: () => import("@/views/CartView.vue"),
     meta: { layout: "DefaultLayout" },
+  },
+  {
+    path: "/success",
+    name: "success",
+    component: () => import("@/views/SuccessView.vue"),
+    meta: { layout: "SimpleLayout" },
   },
   {
     path: "/user",

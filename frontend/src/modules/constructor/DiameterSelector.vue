@@ -8,15 +8,15 @@
             v-for="sizeType in items"
             :key="sizeType.id"
             class="diameter__input"
-            :class="`diameter__input--${sizeType.value}`"
+            :class="`diameter__input--${sizeType.id}`"
         >
           <input
               type="radio"
               name="diameter"
-              :value="sizeType.value"
-              :checked="sizeType.value === modelValue"
+              :value="sizeType.id"
+              :checked="sizeType.id === modelValue"
               class="visually-hidden"
-              @input="emit('update:modelValue', sizeType.value)"
+              @input="emit('update:modelValue', sizeType.id)"
           />
           <span>{{ sizeType.name }}</span>
         </label>
@@ -28,8 +28,8 @@
 <script setup>
 defineProps({
   modelValue: {
-    type: String,
-    default: "",
+    type: Number,
+    required: true,
   },
   items: {
     type: Array,
@@ -41,7 +41,8 @@ const emit = defineEmits(["update:modelValue"]);
 </script>
 
 <style lang="scss" scoped>
-@import "@/assets/scss/app.scss";
+@import "@/assets/scss/ds-system/ds.scss";
+@import "@/assets/scss/mixins/mixins.scss";
 
 .content__diameter {
   width: 373px;
