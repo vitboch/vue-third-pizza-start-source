@@ -7,25 +7,25 @@
         </div>
 
         <div
-            v-if="cartStore.pizzasExtended.length === 0"
-            class="sheet cart__empty"
+          v-if="cartStore.pizzasExtended.length === 0"
+          class="sheet cart__empty"
         >
           <p>В корзине нет ни одного товара</p>
         </div>
 
         <ul v-else class="cart-list sheet">
           <li
-              v-for="(pizza, i) in cartStore.pizzasExtended"
-              :key="i"
-              class="cart-list__item"
+            v-for="(pizza, i) in cartStore.pizzasExtended"
+            :key="i"
+            class="cart-list__item"
           >
             <div class="product cart-list__product">
               <img
-                  :src="getImage('product.svg')"
-                  class="product__img"
-                  width="56"
-                  height="56"
-                  :alt="pizza.name"
+                :src="getPublicImage('/public/img/product.svg')"
+                class="product__img"
+                width="56"
+                height="56"
+                :alt="pizza.name"
               />
               <div class="product__text">
                 <h2>{{ pizza.name }}</h2>
@@ -41,10 +41,10 @@
             </div>
 
             <app-counter
-                class="cart-list__counter"
-                :value="pizza.quantity"
-                accent
-                @input="cartStore.setPizzaQuantity(i, $event)"
+              class="cart-list__counter"
+              :value="pizza.quantity"
+              accent
+              @input="cartStore.setPizzaQuantity(i, $event)"
             />
 
             <div class="cart-list__price">
@@ -53,9 +53,9 @@
 
             <div class="cart-list__button">
               <button
-                  type="button"
-                  class="cart-list__edit"
-                  @click="editPizza(i)"
+                type="button"
+                class="cart-list__edit"
+                @click="editPizza(i)"
               >
                 Изменить
               </button>
@@ -66,26 +66,26 @@
         <div class="cart__additional">
           <ul class="additional-list">
             <li
-                v-for="misc in cartStore.miscExtended"
-                :key="misc.id"
-                class="additional-list__item sheet"
+              v-for="misc in cartStore.miscExtended"
+              :key="misc.id"
+              class="additional-list__item sheet"
             >
               <p class="additional-list__description">
                 <img
-                    :src="getImage(`${misc.image}.svg`)"
-                    width="39"
-                    height="60"
-                    alt="Coca-Cola 0,5 литра"
+                  :src="getPublicImage(misc.image)"
+                  width="39"
+                  height="60"
+                  alt="Coca-Cola 0,5 литра"
                 />
                 <span>{{ misc.name }}</span>
               </p>
 
               <div class="additional-list__wrapper">
                 <app-counter
-                    class="additional-list__counter"
-                    :value="misc.quantity"
-                    accent
-                    @input="cartStore.setMiscQuantity(misc.id, $event)"
+                  class="additional-list__counter"
+                  :value="misc.quantity"
+                  accent
+                  @input="cartStore.setMiscQuantity(misc.id, $event)"
                 />
 
                 <div class="additional-list__price">
@@ -102,27 +102,32 @@
               <span class="cart-form__label">Получение заказа:</span>
 
               <select
-                  name="test"
-                  class="select"
-                  @input="deliveryOption = $event.target.value"
+                name="test"
+                class="select"
+                @input="deliveryOption = $event.target.value"
               >
-                <option value="self">Заберу сам</option>
-                <option value="new">Новый адрес</option>
-                <option value="home">Дом</option>
+                <option :value="-1">Новый адрес</option>
+                <option
+                  v-for="address in profileStore.addresses"
+                  :key="address.id"
+                  :value="address.id"
+                >
+                  {{ address.name }}
+                </option>
               </select>
             </label>
 
             <label class="input input--big-label">
               <span>Контактный телефон:</span>
               <input
-                  v-model="phone"
-                  type="text"
-                  name="tel"
-                  placeholder="+7 999-999-99-99"
+                v-model="phone"
+                type="text"
+                name="tel"
+                placeholder="+7 999-999-99-99"
               />
             </label>
 
-            <div v-if="deliveryOption === 'new'" class="cart-form__address">
+            <div v-if="isNewAddress" class="cart-form__address">
               <span class="cart-form__label">Новый адрес:</span>
 
               <div class="cart-form__input">
@@ -154,8 +159,8 @@
     <section class="footer">
       <div class="footer__more">
         <router-link
-            :to="{ name: 'home' }"
-            class="button button--border button--arrow"
+          :to="{ name: 'home' }"
+          class="button button--border button--arrow"
         >
           Хочу еще одну
         </router-link>
@@ -183,14 +188,29 @@ import { usePizzaStore } from "@/stores/pizza";
 import { useRouter } from "vue-router";
 import { computed, ref } from "vue";
 import { useProfileStore } from "@/stores/profile";
+import { useAuthStore } from "@/stores/auth";
+import { getPublicImage } from "@/common/helpers/public-image";
 
+const authStore = useAuthStore();
 const cartStore = useCartStore();
 const pizzaStore = usePizzaStore();
 const profileStore = useProfileStore();
 
 const router = useRouter();
 
-const deliveryOption = ref("self");
+const deliveryOption = ref(-1);
+const isNewAddress = computed(() => deliveryOption.value === -1);
+const deliveryAddress = computed(() => {
+  if (isNewAddress.value) {
+    return null;
+  } else {
+    return (
+      profileStore.addresses.find(
+        (a) => a.id === Number(deliveryOption.value)
+      ) ?? null
+    );
+  }
+});
 
 const phone = computed({
   get() {
@@ -237,15 +257,16 @@ const editPizza = async (index) => {
 };
 
 const submit = async () => {
-  if (deliveryOption.value === "home") {
-    cartStore.setAddress(profileStore.addresses[0]);
+  if (!isNewAddress.value) {
+    cartStore.setAddress(deliveryAddress.value);
   }
 
-  await router.push({ name: "success" });
-};
-
-const getImage = (image) => {
-  return new URL(`../assets/img/${image}`, import.meta.url).href;
+  const res = await cartStore.publishOrder();
+  if (res.__state === "success") {
+    authStore.isAuthenticated && (await profileStore.loadOrders());
+    await router.push({ name: "success" });
+    cartStore.reset();
+  }
 };
 </script>
 
@@ -527,7 +548,7 @@ const getImage = (image) => {
   border-radius: 8px;
   outline: none;
   background-color: $silver-100;
-  background-image: url("@/assets/img/select.svg");
+  background-image: url("/api/public/img/select.svg");
   background-repeat: no-repeat;
   background-position: right 8px center;
 

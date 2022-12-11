@@ -6,7 +6,7 @@
     <div class="sign-form__title">
       <h1 class="title title--small">Авторизуйтесь на сайте</h1>
     </div>
-    <form action="#" method="post">
+    <form method="post" @submit.prevent="login">
       <div class="sign-form__input">
         <label class="input">
           <span>E-mail</span>
@@ -17,6 +17,9 @@
             placeholder="example@mail.ru"
           />
         </label>
+        <div class="sign-form__input-error">
+          {{ validations.email.error }}
+        </div>
       </div>
 
       <div class="sign-form__input">
@@ -29,21 +32,86 @@
             placeholder="***********"
           />
         </label>
+        <div class="sign-form__input-error">
+          {{ validations.password.error }}
+        </div>
       </div>
       <button type="submit" class="button">Авторизоваться</button>
+
+      <div class="server-error">
+        {{ errorMessage }}
+      </div>
     </form>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
+import { useAuthStore } from "@/stores/auth";
+import { useRouter } from "vue-router";
+import { clearValidationErrors, validateFields } from "@/common/validator";
+
+const authStore = useAuthStore();
+const router = useRouter();
+
+const resetValidations = () => {
+  return {
+    email: {
+      error: "",
+      rules: ["required", "email"],
+    },
+    password: {
+      error: "",
+      rules: ["required"],
+    },
+  };
+};
 
 const email = ref("");
 const password = ref("");
+const validations = ref(resetValidations());
+const errorMessage = ref(null);
+
+const watchField = (field) => () => {
+  if (errorMessage.value) {
+    errorMessage.value = null;
+  }
+
+  if (validations.value[field]?.error) {
+    clearValidationErrors(validations.value);
+  }
+};
+
+watch(email, watchField("email"));
+watch(password, watchField("password"));
+
+const login = async () => {
+  const isValid = validateFields(
+    { email: email.value, password: password.value },
+    validations.value
+  );
+
+  if (!isValid) {
+    return;
+  }
+
+  const resMsg = await authStore.login({
+    email: email.value,
+    password: password.value,
+  });
+
+  if (resMsg === "success") {
+    await authStore.whoami();
+    await router.push({ name: "home" });
+  } else {
+    errorMessage.value = resMsg;
+  }
+};
 </script>
 
 <style lang="scss" scoped>
-@import "@/assets/scss/app.scss";
+@import "@/assets/scss/ds-system/ds.scss";
+@import "@/assets/scss/mixins/mixins.scss";
 
 .sign-form {
   @include pf_center-all;
@@ -59,7 +127,7 @@ const password = ref("");
   padding-bottom: 32px;
   padding-left: 32px;
 
-  background: $white url("@/assets/img/popup.svg") no-repeat center top;
+  background: $white url("/api/public/img/popup.svg") no-repeat center top;
   box-shadow: $shadow-light;
 
   button {
@@ -78,65 +146,17 @@ const password = ref("");
   margin-bottom: 16px;
 }
 
-.close {
-  position: absolute;
-  top: 16px;
-  right: 16px;
+.sign-form__input-error,
+.server-error {
+  height: 16px;
+  color: $red-800;
+}
 
-  width: 25px;
-  height: 25px;
+.sign-form__input-error {
+  margin-top: 4px;
+}
 
-  cursor: pointer;
-  transition: 0.3s;
-  text-decoration: none;
-
-  color: $black;
-  border-radius: 50%;
-  outline: none;
-
-  &::before,
-  &::after {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-
-    width: 25px;
-    height: 2px;
-
-    content: "";
-
-    border-radius: 2px;
-    background-color: $black;
-  }
-
-  &::before {
-    transform: translate(-50%, -50%) rotate(-45deg);
-  }
-
-  &::after {
-    transform: translate(-50%, -50%) rotate(45deg);
-  }
-
-  &:hover {
-    opacity: 0.8;
-  }
-
-  &:active {
-    opacity: 0.5;
-  }
-
-  &:focus {
-    &::before,
-    &::after {
-      background-color: $orange-100;
-    }
-  }
-
-  &--white {
-    &::before,
-    &::after {
-      background-color: $white;
-    }
-  }
+.server-error {
+  margin-top: 20px;
 }
 </style>

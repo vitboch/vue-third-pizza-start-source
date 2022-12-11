@@ -3,16 +3,16 @@
     <p>Основной соус:</p>
 
     <label
-        v-for="sauceType in items"
-        :key="sauceType.id"
-        class="radio ingredients__input"
+      v-for="sauceType in items"
+      :key="sauceType.id"
+      class="radio ingredients__input"
     >
       <input
-          type="radio"
-          name="sauce"
-          :value="sauceType.value"
-          :checked="sauceType.id === modelValue"
-          @input="emit('update:modelValue', sauceType.id)"
+        type="radio"
+        name="sauce"
+        :value="sauceType.value"
+        :checked="sauceType.id === modelValue"
+        @input="emit('update:modelValue', sauceType.id)"
       />
       <span>{{ sauceType.name }}</span>
     </label>

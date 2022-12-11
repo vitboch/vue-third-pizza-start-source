@@ -1,5 +1,5 @@
 <template>
-  <main class="content">
+  <main v-if="dataStore.isDataLoaded" class="content">
     <form action="#" method="post">
       <div class="content__wrapper">
         <h1 class="title title--big">Конструктор пиццы</h1>
@@ -18,9 +18,9 @@
               <sauce-selector v-model="sauceId" :items="dataStore.sauces" />
 
               <ingredients-selector
-                  :values="pizzaStore.ingredientQuantities"
-                  :items="dataStore.ingredients"
-                  @update="pizzaStore.setIngredientQuantity"
+                :values="pizzaStore.ingredientQuantities"
+                :items="dataStore.ingredients"
+                @update="pizzaStore.setIngredientQuantity"
               />
             </div>
           </div>
@@ -30,27 +30,27 @@
           <label class="input">
             <span class="visually-hidden">Название пиццы</span>
             <input
-                v-model="name"
-                type="text"
-                name="pizza_name"
-                placeholder="Введите название пиццы"
+              v-model="name"
+              type="text"
+              name="pizza_name"
+              placeholder="Введите название пиццы"
             />
           </label>
 
           <pizza-constructor
-              :dough="pizzaStore.dough.value"
-              :sauce="pizzaStore.sauce.value"
-              :ingredients="pizzaStore.ingredientsExtended"
-              @drop="pizzaStore.incrementIngredientQuantity"
+            :dough="pizzaStore.dough.value"
+            :sauce="pizzaStore.sauce.value"
+            :ingredients="pizzaStore.ingredientsExtended"
+            @drop="pizzaStore.incrementIngredientQuantity"
           />
 
           <div class="content__result">
             <p>Итого: {{ pizzaStore.price }} ₽</p>
             <button
-                type="button"
-                class="button"
-                :disabled="disableSubmit"
-                @click="addToCart"
+              type="button"
+              class="button"
+              :disabled="disableSubmit"
+              @click="addToCart"
             >
               Готовьте!
             </button>
@@ -127,9 +127,13 @@ const addToCart = async () => {
 
 const resetPizza = () => {
   pizzaStore.setName("");
-  pizzaStore.setDough(dataStore.doughs[0].id);
-  pizzaStore.setSize(dataStore.sizes[0].id);
-  pizzaStore.setSauce(dataStore.sauces[0].id);
+
+  if (dataStore.isDataLoaded) {
+    pizzaStore.setDough(dataStore.doughs[0].id);
+    pizzaStore.setSize(dataStore.sizes[0].id);
+    pizzaStore.setSauce(dataStore.sauces[0].id);
+  }
+
   pizzaStore.setIngredients([]);
 };
 

@@ -5,18 +5,18 @@
 
       <div class="sheet__content">
         <label
-            v-for="sizeType in items"
-            :key="sizeType.id"
-            class="diameter__input"
-            :class="`diameter__input--${sizeType.id}`"
+          v-for="sizeType in items"
+          :key="sizeType.id"
+          class="diameter__input"
+          :class="`diameter__input--${sizeType.id}`"
         >
           <input
-              type="radio"
-              name="diameter"
-              :value="sizeType.id"
-              :checked="sizeType.id === modelValue"
-              class="visually-hidden"
-              @input="emit('update:modelValue', sizeType.id)"
+            type="radio"
+            name="diameter"
+            :value="sizeType.id"
+            :checked="sizeType.id === modelValue"
+            class="visually-hidden"
+            @input="emit('update:modelValue', sizeType.id)"
           />
           <span>{{ sizeType.name }}</span>
         </label>
@@ -76,7 +76,7 @@ const emit = defineEmits(["update:modelValue"]);
 
       border-radius: 50%;
       background-color: $green-100;
-      background-image: url("@/assets/img/diameter.svg");
+      background-image: url("/api/public/img/diameter.svg");
       background-repeat: no-repeat;
       background-position: center;
     }
